@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Panda Monitor</title>
+    <link rel="stylesheet" href='../static/style.css'/>
+    <style>
+        body {
+            background-color: antiquewhite;
+            color: black;
+            text-align: center;
+        }
+
+        #temp, #hum {
+            display: inline-block;
+            width: 300px;
+            height: 200px;
+            margin: 1em;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Panda Monitor</h1>
+    <div id="temp"></div>
+    <div id="hum"></div>
+    <div><img src="{{ url_for('video', width=800, height=600) }}" width="75%"></div>
+    <hr>
+    <h4> 水平角度:
+        <a href="/move/L"class="large red button">-</a>
+        <a href="/move/R"class="large red button">+</a>
+    </h4>
+	<h4> 俯仰角度:
+        <a href="/move/D"class="large blue button">-</a>
+        <a href="/move/U"class="large blue button">+</a>
+    </h4>
+    <hr>
+
+
+    <script src="../static/JustGage/raphael-2.1.4.min.js"></script>
+    <script src="../static/JustGage/justgage.js"></script>
+    <script src="../static/jquery-3.4.1.min.js"></script>
+    <script>
+        var temp, hum;
+        document.addEventListener("DOMContentLoaded", function (event) {
+            temp = new JustGage({
+                id: "temp", value: {{temp}},
+                title: "温度", symbol: "°C",
+                min: -10, max: 50,
+                decimals: 1, gaugeWidthScale: 0.6,
+                customSectors: [
+                    {color : "#0000ff", lo : -10, hi : 20},
+                    {color : "#00ff00", lo : 20, hi : 30},
+                    {color : "#ff0000", lo : 30, hi : 50}
+                ],
+                pointer: true
+
+            });
+            hum = new JustGage({
+                id: "hum", value: {{hum}},
+                title: "湿度", symbol: "%",
+                min: 0, max: 100,
+                decimals: 1, gaugeWidthScale: 0.6,
+                customSectors: [
+                    {color : "#0000ff", lo : 0, hi : 40},
+                    {color : "#00ff00", lo : 40, hi : 60},
+                    {color : "#ff0000", lo : 60, hi : 100}
+                ],
+                pointer: true
+            });
+            setInterval(getData, 30000);
+        });
+        function getData() {
+            $.ajax({
+                url: '/data',
+                data: {},
+                type: 'GET',
+                async: false,
+                dataType: 'json',
+                success: function (data) {
+                    temp.refresh(data.temp);
+                    hum.refresh(data.hum);
+                },
+                error: function (msg) {
+                    console.log(msg);
+                    alert('系统发生错误');
+                }
+            })
+        }
+
+    </script>
+</body>
+
+</html>
+
+
+
+
+
+
+
