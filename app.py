@@ -1,6 +1,7 @@
-import gear
-import sensor
-import camera
+from util import gear
+from util import sensor
+from util import cpu
+from util.camera import Camera
 import json
 from flask import Flask, render_template, Response
 
@@ -9,14 +10,23 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    jsonData = data()
-    return render_template('index.html', **json.loads(jsonData))
+    hum, temp = sensor.get_sensor_data()
+    cpuTemp, cpuUsage, ramUsage = cpu.getInfo()
+    data = {'temp': temp, 'hum': hum, 'cpuTemp': cpuTemp, 'cpuUsage': cpuUsage, 'ramUsage': ramUsage}
+    return render_template('index.html', **data)
 
 
 @app.route("/data")
 def data():
     hum, temp = sensor.get_sensor_data()
     jsonData = {'temp': temp, 'hum': hum}
+    return json.dumps(jsonData)
+
+
+@app.route("/cpu")
+def cpu_info():
+    cpuTemp, cpuUsage, ramUsage = cpu.getInfo()
+    jsonData = {'cpuTemp': cpuTemp, 'cpuUsage': cpuUsage, 'ramUsage': ramUsage}
     return json.dumps(jsonData)
 
 
@@ -29,7 +39,7 @@ def move(direction):
 
 @app.route('/video/<width>/<height>')
 def video(width, height):
-    return Response(_gen(camera.Camera(int(width), int(height))), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(_gen(Camera(int(width), int(height))), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 def _gen(cam):

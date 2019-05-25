@@ -119,22 +119,28 @@ def middle():
     _move(xPWM, xPanelDutyCycle)
     print('-Gear: set to middle position')
 
+
 def left():
     move('L', 180)
+
 
 def right():
     move('R', 180)
 
+
 def up():
     move('U', 180)
 
+
 def down():
     move('D', 180)
+
 
 def clean():
     zPWM.stop()
     xPWM.stop()
     GPIO.cleanup()
+
 
 if __name__ == '__main__':
     middle()
