@@ -1,9 +1,13 @@
 from util import gear
 from util import sensor
 from util import cpu
+from util import database as db
 from util.camera import Camera
 import json
-from flask import Flask, render_template, Response
+import io
+from flask import Flask, render_template, Response, make_response, request
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 app = Flask(__name__)
 
@@ -19,6 +23,7 @@ def index():
 @app.route("/data")
 def data():
     hum, temp = sensor.get_sensor_data()
+    db.insertData(temp, hum)
     jsonData = {'temp': temp, 'hum': hum}
     return json.dumps(jsonData)
 
@@ -40,6 +45,46 @@ def move(direction):
 @app.route('/video/<width>/<height>')
 def video(width, height):
     return Response(_gen(Camera(int(width), int(height))), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/plot/temp')
+def plot_temp():
+    times, temps, hums = db.selectLast24HData()
+    fig = Figure()
+    axis = fig.add_subplot(1, 1, 1)
+    axis.set_title("Last 24H Temperature [`C]")
+    axis.set_xlabel("Time")
+    axis.grid(True)
+    axis.set_ylim(-10, 50)
+    xs = range(len(times))
+    ys = temps
+    axis.plot(xs, ys)
+    canvas = FigureCanvas(fig)
+    output = io.BytesIO()
+    canvas.print_png(output)
+    response = make_response(output.getvalue())
+    response.mimetype = 'image/png'
+    return response
+
+
+@app.route('/plot/hum')
+def plot_hum():
+    times, temps, hums = db.selectLast24HData()
+    fig = Figure()
+    axis = fig.add_subplot(1, 1, 1)
+    axis.set_title("Last 24H Humidity [%]")
+    axis.set_xlabel("Time")
+    axis.grid(True)
+    axis.set_ylim(0, 100)
+    xs = range(len(times))
+    ys = hums
+    axis.plot(xs, ys)
+    canvas = FigureCanvas(fig)
+    output = io.BytesIO()
+    canvas.print_png(output)
+    response = make_response(output.getvalue())
+    response.mimetype = 'image/png'
+    return response
 
 
 def _gen(cam):

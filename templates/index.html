@@ -6,7 +6,7 @@
     <link rel="stylesheet" href='../static/style.css'/>
     <style>
         body {
-            background-color: antiquewhite;
+            background-color: #f9f4dc;
             color: black;
             text-align: center;
         }
@@ -23,13 +23,19 @@
             height: 150px;
             margin: 1em;
         }
+
+        img{
+            display: display: inline-block
+        }
     </style>
 </head>
 
 <body>
     <h1>Panda Monitor</h1>
+    <hr>
     <div id="temp"></div>
     <div id="hum"></div>
+    <hr>
     <div><img src="{{ url_for('video', width=800, height=600) }}" width="75%"></div>
     <hr>
     <h4> 水平角度:
@@ -44,6 +50,9 @@
     <div id="cpuTemp"></div>
     <div id="cpuUsage"></div>
     <div id="ramUsage"></div>
+    <hr>
+    <img src="/plot/temp" alt="Image Placeholder" width="49%">
+	<img src="/plot/hum" alt="Image Placeholder" width="49%">
 
 
     <script src="../static/JustGage/raphael-2.1.4.min.js"></script>
