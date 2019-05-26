@@ -7,12 +7,15 @@ from util.camera import Camera
 import json
 import io
 import threading
+import sys
 from flask import Flask, render_template, Response, make_response, request
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 app = Flask(__name__)
 
+width = 800
+height = 600
 
 @app.route("/")
 def index():
@@ -46,9 +49,9 @@ def move(direction):
     return render_template('index.html', **data)
 
 
-@app.route('/video/<width>/<height>')
-def video(width, height):
-    return Response(_gen(Camera(int(width), int(height))), mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.route('/video')
+def video():
+    return Response(_gen(Camera(width, height)), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @app.route('/plot/temp')
@@ -110,4 +113,9 @@ def init():
 
 if __name__ == '__main__':
     init()
+    if len(sys.argv) == 3:
+        global width, height
+        width = int(sys.argv[1])
+        height = int(sys.argv[2])
+    print("Video size {} x {}.".format(width, height))
     app.run(host='192.168.0.15', port=80, debug=False, threaded=True)
