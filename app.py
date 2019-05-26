@@ -1,10 +1,12 @@
 from util import gear
 from util import sensor
 from util import cpu
+from util import led
 from util import database as db
 from util.camera import Camera
 import json
 import io
+import threading
 from flask import Flask, render_template, Response, make_response, request
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -38,8 +40,10 @@ def cpu_info():
 @app.route("/move/<direction>")
 def move(direction):
     gear.move(direction, 10)
-    jsonData = data()
-    return render_template('index.html', **json.loads(jsonData))
+    hum, temp = sensor.get_sensor_data()
+    cpuTemp, cpuUsage, ramUsage = cpu.getInfo()
+    data = {'temp': temp, 'hum': hum, 'cpuTemp': cpuTemp, 'cpuUsage': cpuUsage, 'ramUsage': ramUsage}
+    return render_template('index.html', **data)
 
 
 @app.route('/video/<width>/<height>')
@@ -100,6 +104,7 @@ def init():
     gear.clean()
     gear.init()
     sensor.get_sensor_data()
+    threading.Thread(target=led.breath).start()
     print("PandaMonitor: init finished\r\n")
 
 

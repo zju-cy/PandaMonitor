@@ -1,7 +1,7 @@
 import sqlite3
 import sys
 
-dbname = './database/sensorData.db'
+dbname = '/home/pi/Python/PandaMonitor/database/sensorData.db'
 
 
 def insertData(temp, hum):
